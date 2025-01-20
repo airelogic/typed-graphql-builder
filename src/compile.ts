@@ -163,14 +163,14 @@ export function compileSchemaDefinitions(
     }
   }
 
-  function printType(def: gq.TypeNode, notNull: boolean = false): string {
+  function printType(def: gq.TypeNode, notNull: boolean = false, isInputType: boolean = false): string {
     switch (def.kind) {
       case gq.Kind.NON_NULL_TYPE:
         return `${printType(def.type, true)}`
       case gq.Kind.LIST_TYPE:
-        return `Readonly<Array<${printType(def.type)}>>${!notNull ? ' | null | undefined' : ''}`
+        return `Readonly<Array<${printType(def.type)}>>${!notNull ? isInputType ?' | null | undefined' : ' | null' : ''}`
       case gq.Kind.NAMED_TYPE:
-        return `${toTSTypeName(def.name.value)}${!notNull ? ' | null | undefined' : ''}`
+        return `${toTSTypeName(def.name.value)}${!notNull ? isInputType ?' | null | undefined' : ' | null' : ''}`
     }
   }
 
@@ -198,7 +198,7 @@ export function compileSchemaDefinitions(
 
   function printInputField(def: gq.InputValueDefinitionNode) {
     const canBeOmitted = def.type.kind !== gq.Kind.NON_NULL_TYPE || def.defaultValue !== undefined
-    return `${def.name.value}${canBeOmitted ? '?' : ''}: ${printType(def.type)}`
+    return `${def.name.value}${canBeOmitted ? '?' : ''}: ${printType(def.type, false, true)}`
   }
 
   function printDocumentation(description?: gq.StringValueNode) {
